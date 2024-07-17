@@ -2,7 +2,7 @@
 
 pub mod tetri_core {
     use std::collections::VecDeque;
-
+    use rand::{rngs::ThreadRng, seq::SliceRandom};
 
     #[derive(Debug,Clone,PartialEq, PartialOrd)]
     pub enum Mino{
@@ -13,6 +13,15 @@ pub mod tetri_core {
         S,
         T,
         Z,
+    }
+
+    #[derive(Debug,Clone)]
+    pub enum KindTS{
+        None,
+        Mini,
+        Single,
+        Double,
+        Triple,
     }
 
     #[derive(Debug,Clone)]
@@ -132,13 +141,8 @@ pub mod tetri_core {
     }
 
     pub trait TetriManager {
-        fn init(_obj : &mut TetriObj) -> u32{
-            _obj.id = 0;
-            _obj.next;
-
-
-            return _obj.id;
-        }
+        fn new() -> TetriObj;
+        fn init(&mut self, _rng: &mut ThreadRng, _id: u32) -> u32;
     }
 
     #[derive(Debug,Clone)]
@@ -146,9 +150,66 @@ pub mod tetri_core {
         id: u32,
         current: i8,
         hold: i8,
+        btb: i32,
+        combo: i32,
+        kind_srs: i8,
+        kind_ts: KindTS,
         next: VecDeque<i8>,
+        next_seed: Vec<i8>,
         field: Vec<Vec<i8>>,
     }
+    
+    impl TetriObj {
+        pub fn next(&self) -> &VecDeque<i8> {
+            &self.next
+        }
+    }
+
+    impl TetriManager for TetriObj{
+        fn new() -> TetriObj {
+            TetriObj { 
+                id : 0,
+                current : 0,
+                hold : 0,
+                btb : 0,
+                combo : 0,
+                kind_srs : 0,
+                kind_ts : KindTS::None,
+                next : VecDeque::new(),
+                next_seed : vec![1, 2, 3, 4, 5, 6, 7],
+                field : vec![vec![0; 10]; 45],
+            }
+        }
+
+        fn init(&mut self, _rng: &mut ThreadRng, _id: u32) -> u32 {
+            self.id = _id;
+            self.current = 0;
+            self.hold = 0;
+            self.btb = 0;
+            self.combo = 0;
+            self.kind_srs = 0;
+            self.kind_ts = KindTS::None;
+            //self.next_seed = vec![1, 2, 3, 4, 5, 6, 7];
+            self.next_seed.shuffle(_rng);
+            self.next.clear();
+            for _n in &self.next_seed {
+                self.next.push_back(_n.clone());
+            }
+            for col in self.field.iter_mut(){
+                for row in col.iter_mut(){
+                    *row = 0;
+                }
+            }
+            self.field = vec![vec![0; 10]; 45];
+
+            return self.id;
+        }
+
+        
+
+
+    }
+
 
 
 }
