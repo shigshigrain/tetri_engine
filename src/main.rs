@@ -1,7 +1,6 @@
-use tetri_core::tetri_core::{Mino, Tetri};
-
 mod tetri_core;
 
+use tetri_core::tetri_core::{Mino, Tetri};
 
 fn main() {
 

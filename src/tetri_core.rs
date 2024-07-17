@@ -1,6 +1,8 @@
 
 
 pub mod tetri_core {
+    use std::collections::VecDeque;
+
 
     #[derive(Debug,Clone,PartialEq, PartialOrd)]
     pub enum Mino{
@@ -128,5 +130,25 @@ pub mod tetri_core {
         }
         
     }
+
+    pub trait TetriManager {
+        fn init(_obj : &mut TetriObj) -> u32{
+            _obj.id = 0;
+            _obj.next;
+
+
+            return _obj.id;
+        }
+    }
+
+    #[derive(Debug,Clone)]
+    pub struct TetriObj {
+        id: u32,
+        current: i8,
+        hold: i8,
+        next: VecDeque<i8>,
+        field: Vec<Vec<i8>>,
+    }
+
 
 }
