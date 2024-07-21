@@ -1,6 +1,7 @@
 mod tetri_core;
 mod tetri_data;
 use tetri_core::tetri_core::{Mino, Tetri, TetriManager, TetriObj};
+use std::io;
 
 fn main() {
 
@@ -10,7 +11,41 @@ fn main() {
     let mut test_obj = TetriObj::new();
     test_obj.init(&mut my_rng, 1);
 
-    println!("{:?}", test_obj.next());
+    //println!("{:?}", test_obj.next());
     
+    
+
+    loop {
+        
+        let mut input = String::new();
+
+        io::stdin()
+            .read_line(&mut input)  
+            .expect("failed to read");
+
+        let input: u32 = match input.trim().parse() {
+            Ok(num) => num,
+            Err(_) => continue,
+        };
+
+
+        match input {
+            0 => { 
+                test_obj.hard_drop();
+            },
+            1 => {
+                break;
+            },
+            _ => (),
+        };
+
+        test_obj.paste_mino();
+        test_obj.output_field();
+        test_obj.replenish_current();
+
+    };
+
+    print!("Exit!");
+
 
 }

@@ -3,8 +3,9 @@
 pub mod tetri_core {
     use std::collections::VecDeque;
     use rand::{rngs::ThreadRng, seq::SliceRandom};
+    use crate::tetri_data::tetri_data;
 
-    #[derive(Debug,Clone,PartialEq, PartialOrd)]
+    #[derive(Debug,Clone, Copy,PartialEq, PartialOrd)]
     pub enum Mino{
         None,
         I,
@@ -150,6 +151,10 @@ pub mod tetri_core {
         pub fn id(&self) -> &Mino {
             &self.id
         }
+
+        pub fn get_param(&self) -> (i8, i8, i8){
+            (self.rot, self.y, self.x)
+        }
         
     }
 
@@ -160,7 +165,8 @@ pub mod tetri_core {
         fn replenish_current(&mut self);
         fn operate(&mut self, _cmd: &OperateCmd);
         fn hard_drop(&mut self);
-
+        fn check_index(&self, _cy: &i8, _cx: &i8) -> bool;
+        fn check_move(&mut self, _sx: i8, _sy: i8) -> bool;
         fn paste_mino(&mut self);
         fn output_field(& self);
     }
@@ -257,25 +263,141 @@ pub mod tetri_core {
         }
 
         fn hard_drop(&mut self){
-            todo!()
+            while self.check_move(0, -1) {
+                self.current_mino.add_y(&-1);
+            }
+        }
+
+        fn check_index(&self, _cy: &i8, _cx: &i8) -> bool {
+            let mut tf = false;
+            if 0 < *_cy && *_cy <= 45 && 0 <= *_cx && *_cx < 10{
+                tf = true;
+            }
+
+            tf
         }
         
+        fn check_move(&mut self, _sx: i8, _sy: i8) -> bool{
+            let (_r, mut _ty, mut _tx) = self.current_mino.get_param();
+            _ty += _sy;
+            _tx += _sx;
+           
+            let mut _cnt = 0;
+            let mut _myx: (i8, i8) = (0, 0);
+
+            for i in 0..4usize{
+                match self.current {
+                    Mino::None => {
+                        _myx = (0, 0);
+                    },
+                    Mino::I => {
+                        _myx = tetri_data::BLC_I_LIST[_r as usize][i];
+                    },
+                    Mino::J => {
+                        _myx = tetri_data::BLC_J_LIST[_r as usize][i];
+                    },
+                    Mino::L => {
+                        _myx = tetri_data::BLC_L_LIST[_r as usize][i];
+                    },
+                    Mino::O => {
+                        _myx = tetri_data::BLC_O_LIST[_r as usize][i];
+                    },
+                    Mino::S => {
+                        _myx = tetri_data::BLC_S_LIST[_r as usize][i];
+                    },
+                    Mino::T => {
+                        _myx = tetri_data::BLC_T_LIST[_r as usize][i];
+                    },
+                    Mino::Z => {
+                        _myx = tetri_data::BLC_Z_LIST[_r as usize][i];
+                    },
+                }
+
+                // 配列と見た目のy軸向きを合わせるため、_yはマイナスにする;
+                let _ty = _ty - _myx.0;
+                let _tx = _tx + _myx.1;
+                if self.check_index(&_ty, &_tx){
+                    if self.field[_ty as usize][_tx as usize] == 0i8{
+                        _cnt += 1;
+                    }
+                }
+                else {
+                    continue;
+                }
+
+            }
+
+            if _cnt < 4{
+                false
+            }
+            else{
+                true
+            }
+        
+        }
+
         fn paste_mino(&mut self) {
             
+            let (_r, mut _ty, mut _tx) = self.current_mino.get_param();
+
+            let mut _cnt = 0;
+            let mut _myx: (i8, i8) = (0, 0);
+
+            for i in 0..4usize{
+                match self.current {
+                    Mino::None => {
+                        _myx = (0, 0);
+                    },
+                    Mino::I => {
+                        _myx = tetri_data::BLC_I_LIST[_r as usize][i];
+                    },
+                    Mino::J => {
+                        _myx = tetri_data::BLC_J_LIST[_r as usize][i];
+                    },
+                    Mino::L => {
+                        _myx = tetri_data::BLC_L_LIST[_r as usize][i];
+                    },
+                    Mino::O => {
+                        _myx = tetri_data::BLC_O_LIST[_r as usize][i];
+                    },
+                    Mino::S => {
+                        _myx = tetri_data::BLC_S_LIST[_r as usize][i];
+                    },
+                    Mino::T => {
+                        _myx = tetri_data::BLC_T_LIST[_r as usize][i];
+                    },
+                    Mino::Z => {
+                        _myx = tetri_data::BLC_Z_LIST[_r as usize][i];
+                    },
+                }
+
+                let _ty = _ty - _myx.0;
+                let _tx = _tx + _myx.1;
+                if self.check_index(&_ty, &_tx){
+                    self.field[(_ty - 1) as usize][_tx as usize] = self.current as i8;
+                }
+                else {
+                    continue;
+                }
+
+            }
+
+
         }
 
         fn output_field(&self){
             println!("field -> \n");
             for col in self.field.iter().rev(){
+                let mut _cs = String::new();
                 for blc in col.iter(){
                     if *blc == 0 {
-                        println!("□");
+                        _cs.push_str("□");
                     }
                     else{
-                        println!("■");
+                        _cs.push_str("■");
                     }
                 }
-                println!("\n");
+                println!("{}", _cs);
             }
         }
 
