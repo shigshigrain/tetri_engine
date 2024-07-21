@@ -1,5 +1,5 @@
 mod tetri_core;
-
+mod tetri_data;
 use tetri_core::tetri_core::{Mino, Tetri, TetriManager, TetriObj};
 
 fn main() {
@@ -11,5 +11,6 @@ fn main() {
     test_obj.init(&mut my_rng, 1);
 
     println!("{:?}", test_obj.next());
+    
 
 }

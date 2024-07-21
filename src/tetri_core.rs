@@ -6,6 +6,7 @@ pub mod tetri_core {
 
     #[derive(Debug,Clone,PartialEq, PartialOrd)]
     pub enum Mino{
+        None,
         I,
         J,
         L,
@@ -15,13 +16,25 @@ pub mod tetri_core {
         Z,
     }
 
-    #[derive(Debug,Clone)]
+    #[derive(Debug,Clone, Copy)]
     pub enum KindTS{
         None,
         Mini,
         Single,
         Double,
         Triple,
+    }
+
+    #[derive(Debug,Clone, Copy)]
+    pub enum OperateCmd{
+        None,
+        Hold,
+        SoftDrop,
+        HardDrop,
+        RotateCCW,
+        RotateFCW,
+        MoveLeft,
+        MoveRight,
     }
 
     #[derive(Debug,Clone)]
@@ -143,48 +156,58 @@ pub mod tetri_core {
     pub trait TetriManager {
         fn new() -> TetriObj;
         fn init(&mut self, _rng: &mut ThreadRng, _id: u32) -> u32;
+
+        fn replenish_current(&mut self);
+        fn operate(&mut self, _cmd: &OperateCmd);
+        fn hard_drop(&mut self);
+
+        fn paste_mino(&mut self);
+        fn output_field(& self);
     }
 
     #[derive(Debug,Clone)]
     pub struct TetriObj {
         id: u32,
-        current: i8,
-        hold: i8,
+        current: Mino,
+        hold: Mino,
         btb: i32,
         combo: i32,
         kind_srs: i8,
         kind_ts: KindTS,
-        next: VecDeque<i8>,
-        next_seed: Vec<i8>,
+        next: VecDeque<Mino>,
+        next_seed: Vec<Mino>,
+        current_mino: Tetri,
         field: Vec<Vec<i8>>,
     }
     
     impl TetriObj {
-        pub fn next(&self) -> &VecDeque<i8> {
+        pub fn next(&self) -> &VecDeque<Mino> {
             &self.next
         }
+
     }
 
     impl TetriManager for TetriObj{
         fn new() -> TetriObj {
             TetriObj { 
                 id : 0,
-                current : 0,
-                hold : 0,
+                current : Mino::None,
+                hold : Mino::None,
                 btb : 0,
                 combo : 0,
                 kind_srs : 0,
                 kind_ts : KindTS::None,
                 next : VecDeque::new(),
-                next_seed : vec![1, 2, 3, 4, 5, 6, 7],
+                next_seed : vec![Mino::I, Mino::J, Mino::L, Mino::O, Mino::S, Mino::T, Mino::Z],
+                current_mino : Tetri::new(0, 3, 21, Mino::T),
                 field : vec![vec![0; 10]; 45],
             }
         }
 
         fn init(&mut self, _rng: &mut ThreadRng, _id: u32) -> u32 {
             self.id = _id;
-            self.current = 0;
-            self.hold = 0;
+            self.current = Mino::None;
+            self.hold = Mino::None;
             self.btb = 0;
             self.combo = 0;
             self.kind_srs = 0;
@@ -195,9 +218,11 @@ pub mod tetri_core {
             for _n in &self.next_seed {
                 self.next.push_back(_n.clone());
             }
+            self.replenish_current();
+
             for col in self.field.iter_mut(){
-                for row in col.iter_mut(){
-                    *row = 0;
+                for blc in col.iter_mut(){
+                    *blc = 0;
                 }
             }
             self.field = vec![vec![0; 10]; 45];
@@ -205,8 +230,54 @@ pub mod tetri_core {
             return self.id;
         }
 
-        
+        fn replenish_current(&mut self){
+            let _nc = self.next.pop_front();
+            match _nc {
+                Some(_c) => {
+                    self.current = _c.clone();
+                    self.current_mino.set_mino(_c);
+                },
+                None => (),
+            } 
+        }
 
+        fn operate(&mut self, _cmd: &OperateCmd){
+            
+            match _cmd {
+                OperateCmd::None => todo!(),
+                OperateCmd::Hold => todo!(),
+                OperateCmd::SoftDrop => todo!(),
+                OperateCmd::HardDrop => self.hard_drop(),
+                OperateCmd::RotateCCW => todo!(),
+                OperateCmd::RotateFCW => todo!(),
+                OperateCmd::MoveLeft => todo!(),
+                OperateCmd::MoveRight => todo!(),
+            }
+
+        }
+
+        fn hard_drop(&mut self){
+            todo!()
+        }
+        
+        fn paste_mino(&mut self) {
+            
+        }
+
+        fn output_field(&self){
+            println!("field -> \n");
+            for col in self.field.iter().rev(){
+                for blc in col.iter(){
+                    if *blc == 0 {
+                        println!("□");
+                    }
+                    else{
+                        println!("■");
+                    }
+                }
+                println!("\n");
+            }
+        }
 
     }
 
