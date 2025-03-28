@@ -1,6 +1,6 @@
 mod tetri_core;
 mod tetri_data;
-use tetri_core::tetri_core::{Mino, Tetri, TetriManager, TetriObj};
+use tetri_core::tetri_core::{Mino, Tetri, TetriDebug, TetriManager, TetriObj};
 use std::io;
 
 fn main() {
@@ -12,8 +12,6 @@ fn main() {
     test_obj.init(&mut my_rng, 1);
 
     //println!("{:?}", test_obj.next());
-    
-    
 
     loop {
         
@@ -36,12 +34,15 @@ fn main() {
             1 => {
                 break;
             },
+            2 => {
+                break;
+            },
             _ => (),
         };
 
         test_obj.paste_mino();
-        test_obj.output_field();
         test_obj.replenish_current();
+        test_obj.output_field_on_current();
 
     };
 
